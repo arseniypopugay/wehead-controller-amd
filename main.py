@@ -1,42 +1,25 @@
+import cv2
+import time
 import os
-import asyncio
-import json
-from websockets import connect
-from time import sleep
 
+from wehead_hack_sdk import Wehead
 
-HEADID = os.environ["HEADID"]
-HEADTOKEN = os.environ["HEADTOKEN"]
-HEADURI = os.environ["HEADURI"]
+token = os.environ.get("HEADTOKEN", "YOUR_TOKEN_HERE")
+wehead = Wehead(token)
 
-async def interact_with_websocket():
-    uri = "wss://" + HEADURI + "/control/user/" + HEADID + "?token=" + HEADTOKEN
-    i = 0
-    while i<=10:
-        async with connect(uri) as websocket:
-            # send message type 'tts'
-            tts_message = {
-                "type": "tts",
-                "data": {
-                    "text": "Hello Robotics World!"
-                }
-            }
-            await websocket.send(json.dumps(tts_message))
+wehead.move(pitch=0.5, yaw=0.5)
+wehead.say("Hello robotics world!")
 
-            # send message type 'move'
-            move_message = {
-                "type": "move",
-                "data": {
-                    "position": "velocity",
-                    "pitch": 0.1,
-                    "yaw": 0.2
-                }
-            }
-            await websocket.send(json.dumps(move_message))
+@wehead.on_video
+def process_frame(img):
+    pass
 
-            # receiving messages
-            async for message in websocket:
-                print(f"Received message: {message}")
-            sleep(5)
+@wehead.on_phrase
+def handle_phrase(text):
+    if text == "Exit.":
+        wehead.say("Goodbye")
+        time.sleep(1)
+        exit()
 
-asyncio.run(interact_with_websocket())
+while True:
+    pass  # Keep the script running
