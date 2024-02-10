@@ -1,2 +1,3 @@
 asyncio
 websockets
+git+https://github.com/zerodistanceinc/wehead_hack_sdk.git
